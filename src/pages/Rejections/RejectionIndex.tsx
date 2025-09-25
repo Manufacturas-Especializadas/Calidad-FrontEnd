@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { OffCanvas } from "../../components/OffCanvas/OffCanvas";
 import { FormInput } from "../../components/FormInput/FormInput";
 import { rejectionService, type RejectionFormData } from "../../api/services/RejectionService";
@@ -12,7 +12,8 @@ import Swal from "sweetalert2";
 import { SignaturePad } from "../../components/SignaturePad/SignaturePad";
 import ErrorBoundary from "../../components/ErrorBoundary/ErrorBoundary";
 import type { Rejections } from "../../interfaces/Rejections";
-import { Table } from "../../components/Table/Table";
+import { FaWhatsapp } from "react-icons/fa";
+import { PiMicrosoftOutlookLogoFill } from "react-icons/pi";
 
 export const RejectionIndex = () => {
     const [formData, setFormData] = useState<RejectionFormData>({
@@ -53,6 +54,16 @@ export const RejectionIndex = () => {
         numberOfPieces: "",
         operatorPayroll: ""
     });
+
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 5;
+
+    const totalPage = Math.ceil(rejection.length / itemsPerPage);
+    const currentItems = useMemo(() => {
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        return rejection.slice(startIndex, startIndex + itemsPerPage);
+    }, [rejection, currentPage, itemsPerPage]);
+
 
     const handleOpenOffcanvas = () => setIsOffcanvasOpen(true);
     const handleCloseOffcanvas = () => setIsOffcanvasOpen(false);
@@ -158,16 +169,17 @@ export const RejectionIndex = () => {
         loadNextFolio();
     }, [isOffcanvasOpen]);
 
+    const loadRejection = async () => {
+        try {
+            const data = await rejectionService.getRejections();
+            setRejection(data || []);
+        } catch (error: any) {
+            console.error("Error al obtener la lista: ", error);
+            setRejection([]);
+        }
+    };
+
     useEffect(() => {
-        const loadRejection = async () => {
-            try {
-                const data = await rejectionService.getRejections();
-                setRejection(data || []);
-            } catch (error: any) {
-                console.error("Error al obtener la lista: ", error);
-                setRejection([]);
-            }
-        };
         loadRejection();
     }, []);
 
@@ -204,7 +216,7 @@ export const RejectionIndex = () => {
             <img
                 src={firstUrl}
                 alt="Rechazo"
-                className="h-15 w-15 object-cover rounded-full border border-gray-200"
+                className="h-20 w-20 object-cover rounded-full border border-gray-200"
                 onError={(e) => {
                     (e.target as HTMLImageElement).src = "Sin evidencia";
                 }}
@@ -343,6 +355,8 @@ export const RejectionIndex = () => {
                     showConfirmButton: false
                 });
 
+                await loadRejection();
+
             } else {
                 Swal.fire({
                     title: "Error al registrar",
@@ -371,6 +385,16 @@ export const RejectionIndex = () => {
         }
     };
 
+    const formatDate = (dateString: string) => {
+        if (!dateString) return "-";
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) return "-";
+        const day = String(date.getDate()).padStart(2, "0");
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const year = date.getFullYear();
+        return `${day}/${month}/${year}`;
+    };;
+
     const removeFile = (index: number) => {
         setSelectedFiles(prev => prev.filter((_, i) => i !== index));
     };
@@ -378,6 +402,120 @@ export const RejectionIndex = () => {
     const handleSignatureChange = (signatureBase64: string) => {
         setFormData(prev => ({ ...prev, informedSignature: signatureBase64 }));
     };
+
+    const sendToWhatsApp = (rejectionItem: Rejections) => {
+        const {
+            partNumber,
+            defects: defectName,
+            condition: conditionName,
+            description,
+            numberOfPieces,
+            lines: lineName,
+            clients: clientName,
+            operatorPayroll,
+            image,
+            registrationDate
+        } = rejectionItem;
+
+        const date = new Date(registrationDate);
+        const formattedDate = isNaN(date.getTime())
+            ? "Fecha no disponible"
+            : date.toLocaleDateString("es-MX", {
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric",
+                hour: "2-digit",
+                minute: "2-digit"
+            });
+
+
+        const imageUrls = image && typeof image === "string"
+            ? image.split(";").filter(url => url.trim() !== "")
+            : [];
+
+        let evidenceText = "";
+        if (imageUrls.length > 0) {
+            const firstImage = imageUrls[0];
+            evidenceText = `\n📸 *Evidencia:* ${firstImage}`;
+            evidenceText = imageUrls.map((url, i) => `\n📸 *Foto ${i + 1}:* ${url}`).join('');
+        } else {
+            evidenceText = "\n📸 *Evidencia:* No disponible";
+        }
+        const message = `Buen día, reporte de rechazo interno ${formattedDate}
+            📄 *Número de parte:* ${partNumber || "—"}
+            🧩 *Defecto:* ${defectName || "—"}
+            🔍 *Condición:* ${conditionName || "—"}
+            🏭 *Línea:* ${lineName || "—"}
+            🏭 *Cliente:* ${clientName || "—"}
+            👤 *Nómina operador:* ${operatorPayroll || "—"}
+            🔢 *Piezas rechazadas:* ${numberOfPieces || 0}
+            📝 *Descripción:* ${description || "Sin descripción"}${evidenceText}
+            Saludos.`.trim();
+
+        const encodedMessage = encodeURIComponent(message);
+        const whatsappUrl = `https://web.whatsapp.com/send?text=${encodedMessage}`;
+
+        const newWindow = window.open(whatsappUrl, '_blank');
+        if (newWindow) {
+            newWindow.focus();
+        } else {
+            Swal.fire({
+                title: "Ventana emergente bloqueada",
+                text: "Por favor, permite las ventanas emergentes para compartir en WhatsApp",
+                icon: "warning",
+                confirmButtonText: "Entendido"
+            });
+        }
+    };
+
+    // const sendToOutlook = (rejectionItem: Rejections) => {
+    //     const {
+    //         partNumber,
+    //         defects: defectName,
+    //         condition: conditionName,
+    //         description,
+    //         numberOfPieces,
+    //         lines: lineName,
+    //         clients: clientName,
+    //         operatorPayroll,
+    //         image,
+    //         registrationDate
+    //     } = rejectionItem;
+
+    //     const date = new Date(registrationDate);
+    //     const formattedDate = isNaN(date.getTime())
+    //         ? "Fecha no disponible"
+    //         : date.toLocaleDateString("es-Mx", {
+    //             day: "2-digit",
+    //             month: "2-digit",
+    //             year: "numeric",
+    //             hour: "2-digit",
+    //             minute: "2-digit"
+    //         });
+
+    //     const subject = `Reporte de rechazo interno - ${formattedDate}`;
+
+    //     const body = `Buen día, reporte de rechazo interno ${formattedDate}
+    //         Número de parte: ${partNumber || "—"}
+    //         Defecto: ${defectName || "—"}
+    //         Condición: ${conditionName || "—"}
+    //         Línea: ${lineName || "—"}
+    //         Cliente: ${clientName || "—"}
+    //         Nómina operador: ${operatorPayroll || "—"}
+    //         Piezas rechazadas: ${numberOfPieces || 0}
+    //         Descripción: ${description || "Sin descripción"}
+
+    //         Nota: ${image ? "Evidencia fotográfica adjunta en el sistema." : "Sin evidencia fotográfica."}
+
+    //         Saludos.`;
+
+    //     const encodedSubject = encodeURIComponent(subject);
+    //     const encodedBody = encodeURIComponent(body);
+
+    //     const mailtoUrl = `mailto:?subject=${encodedSubject}&body=${encodedBody}`;
+
+    //     window.location.href = mailtoUrl;
+    // };
 
     const defectOptions = defects.map((defects) => ({
         value: defects.id.toString(),
@@ -403,35 +541,6 @@ export const RejectionIndex = () => {
         value: action.id.toString(),
         label: action.name
     }));
-
-    const columns = [
-        {
-            name: " ",
-            cell: (row: Rejections) => renderFirstImage(row.image),
-        },
-        {
-            name: "Número de parte",
-            selector: (row: Rejections) => row.partNumber,
-        },
-        {
-            name: "Descripción",
-            selector: (row: Rejections) => row.description
-        },
-        {
-            name: "Fecha",
-            selector: (row: Rejections) => {
-                if (!row.registrationDate) return "-";
-
-                const date = new Date(row.registrationDate);
-                if (isNaN(date.getDate())) return "-";
-                const day = String(date.getDate()).padStart(2, "0");
-                const month = String(date.getMonth() + 1).padStart(2, "0");
-                const year = date.getFullYear();
-
-                return `${day}/${month}/${year}`;
-            }
-        }
-    ];
 
     return (
         <>
@@ -461,11 +570,82 @@ export const RejectionIndex = () => {
                                 </div>
                             ) : (
                                 <>
-                                    <Table
-                                        columns={columns}
-                                        data={rejection}
-                                        pagination
-                                    />
+                                    <div className="space-y-5">
+                                        {currentItems.map((item) => (
+                                            <article
+                                                key={item.id}
+                                                className="group relative rounded-xl border border-gray-200 bg-white p-5 
+                                                    shadow-sm transition-all duration-300 hover:shadow-md hover:border-gray-300"
+                                            >
+                                                <time className="block text-xs font-medium text-gray-500 mb-3">
+                                                    {formatDate(item.registrationDate)}
+                                                </time>
+
+                                                <div className="flex flex-col sm:flex-row gap-4">
+                                                    <div className="flex-shrink-0 w-16 h-16 rounded-lg 
+                                                        overflow-hidden bg-gray-100 flex items-center justify-center">
+                                                        {renderFirstImage(item.image) || (
+                                                            <span className="text-gray-400 text-sm">Sin imagen</span>
+                                                        )}
+                                                    </div>
+
+                                                    <div className="flex-1 min-w-0">
+                                                        <h3 className="text-sm sm:text-base font-semibold text-gray-900 leading-relaxed line-clamp-2">
+                                                            {item.description}
+                                                        </h3>
+                                                    </div>
+
+                                                    <div className="flex gap-2 mt-2 sm:mt-0 sm:ml-auto">
+                                                        <button
+                                                            aria-label="Enviar por WhatsApp"
+                                                            className="flex items-center justify-center w-10 h-10 rounded-lg 
+                                                            bg-green-50 text-green-600 hover:bg-green-100 transition-colors 
+                                                            focus:outline-none focus:ring-2 focus:ring-green-300 hover:cursor-pointer"
+                                                            onClick={() => sendToWhatsApp(item)}
+                                                        >
+                                                            <FaWhatsapp className="text-lg" />
+                                                        </button>
+                                                        <button
+                                                            aria-label="Enviar por Outlook"
+                                                            className="flex items-center justify-center w-10 h-10 rounded-lg 
+                                                            bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors 
+                                                            focus:outline-none focus:ring-2 focus:ring-blue-300 hover:cursor-pointer"
+                                                        // onClick={() => sendToOutlook(item)}
+                                                        >
+                                                            <PiMicrosoftOutlookLogoFill className="text-lg" />
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </article>
+                                        ))}
+                                    </div>
+
+                                    {totalPage > 1 && (
+                                        <div className="mt-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+                                            <button
+                                                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                                                disabled={currentPage === 1}
+                                                className="px-4 py-2 text-sm font-medium text-gray-700 
+                                                bg-white border border-gray-300 rounded-lg hover:bg-gray-50 
+                                                disabled:opacity-50 disabled:cursor-not-allowed transition-colors 
+                                                focus:outline-none focus:ring-2 focus:ring-gray-300"
+                                            >
+                                                Anterior
+                                            </button>
+
+                                            <span className="text-sm font-medium text-gray-600 px-2">
+                                                Página <span className="font-semibold">{currentPage}</span> de {totalPage}
+                                            </span>
+
+                                            <button
+                                                onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPage))}
+                                                disabled={currentPage === totalPage}
+                                                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors focus:outline-none focus:ring-2 focus:ring-gray-300"
+                                            >
+                                                Siguiente
+                                            </button>
+                                        </div>
+                                    )}
                                 </>
                             )
                         }
