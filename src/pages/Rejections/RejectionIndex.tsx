@@ -468,54 +468,65 @@ export const RejectionIndex = () => {
         }
     };
 
-    // const sendToOutlook = (rejectionItem: Rejections) => {
-    //     const {
-    //         partNumber,
-    //         defects: defectName,
-    //         condition: conditionName,
-    //         description,
-    //         numberOfPieces,
-    //         lines: lineName,
-    //         clients: clientName,
-    //         operatorPayroll,
-    //         image,
-    //         registrationDate
-    //     } = rejectionItem;
+    const sendToOutlook = (rejectionItem: Rejections) => {
+        const {
+            partNumber,
+            defects: defectName,
+            condition: conditionName,
+            description,
+            numberOfPieces,
+            lines: lineName,
+            clients: clientName,
+            operatorPayroll,
+            image,
+            registrationDate
+        } = rejectionItem;
 
-    //     const date = new Date(registrationDate);
-    //     const formattedDate = isNaN(date.getTime())
-    //         ? "Fecha no disponible"
-    //         : date.toLocaleDateString("es-Mx", {
-    //             day: "2-digit",
-    //             month: "2-digit",
-    //             year: "numeric",
-    //             hour: "2-digit",
-    //             minute: "2-digit"
-    //         });
+        const date = new Date(registrationDate);
+        const formattedDate = isNaN(date.getTime())
+            ? "Fecha no disponible"
+            : date.toLocaleDateString("es-MX", {
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric",
+                hour: "2-digit",
+                minute: "2-digit"
+            });
 
-    //     const subject = `Reporte de rechazo interno - ${formattedDate}`;
+        const subject = `Reporte de rechazo interno - ${formattedDate}`;
 
-    //     const body = `Buen día, reporte de rechazo interno ${formattedDate}
-    //         Número de parte: ${partNumber || "—"}
-    //         Defecto: ${defectName || "—"}
-    //         Condición: ${conditionName || "—"}
-    //         Línea: ${lineName || "—"}
-    //         Cliente: ${clientName || "—"}
-    //         Nómina operador: ${operatorPayroll || "—"}
-    //         Piezas rechazadas: ${numberOfPieces || 0}
-    //         Descripción: ${description || "Sin descripción"}
+        const imageUrls = image && typeof image === 'string'
+            ? image.split(';').filter(url => url.trim() !== '')
+            : [];
 
-    //         Nota: ${image ? "Evidencia fotográfica adjunta en el sistema." : "Sin evidencia fotográfica."}
+        let evidenceText = "";
+        if (imageUrls.length > 0) {
+            const firstImage = imageUrls[0];
+            evidenceText = `\nEvidencia: ${firstImage}`;
+            evidenceText = imageUrls.map((url, i) => `\nFoto ${i + 1}: ${url}`).join('');
+        } else {
+            evidenceText = "\nEvidencia: No disponible";
+        }
 
-    //         Saludos.`;
+        const body = `Buen día, reporte de rechazo interno ${formattedDate}
 
-    //     const encodedSubject = encodeURIComponent(subject);
-    //     const encodedBody = encodeURIComponent(body);
+        Número de parte: ${partNumber || "—"}
+        Defecto: ${defectName || "—"}
+        Condición: ${conditionName || "—"}
+        Línea: ${lineName || "—"}
+        Cliente: ${clientName || "—"}
+        Nómina operador: ${operatorPayroll || "—"}
+        Piezas rechazadas: ${numberOfPieces || 0}
+        Descripción: ${description || "Sin descripción"}${evidenceText}
 
-    //     const mailtoUrl = `mailto:?subject=${encodedSubject}&body=${encodedBody}`;
+        Saludos.`;
 
-    //     window.location.href = mailtoUrl;
-    // };
+        const encodedSubject = encodeURIComponent(subject);
+        const encodedBody = encodeURIComponent(body);
+        const mailtoUrl = `mailto:?subject=${encodedSubject}&body=${encodedBody}`;
+
+        window.location.href = mailtoUrl;
+    };
 
     const defectOptions = defects.map((defects) => ({
         value: defects.id.toString(),
@@ -610,7 +621,7 @@ export const RejectionIndex = () => {
                                                             className="flex items-center justify-center w-10 h-10 rounded-lg 
                                                             bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors 
                                                             focus:outline-none focus:ring-2 focus:ring-blue-300 hover:cursor-pointer"
-                                                        // onClick={() => sendToOutlook(item)}
+                                                            onClick={() => sendToOutlook(item)}
                                                         >
                                                             <PiMicrosoftOutlookLogoFill className="text-lg" />
                                                         </button>
@@ -628,7 +639,7 @@ export const RejectionIndex = () => {
                                                 className="px-4 py-2 text-sm font-medium text-gray-700 
                                                 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 
                                                 disabled:opacity-50 disabled:cursor-not-allowed transition-colors 
-                                                focus:outline-none focus:ring-2 focus:ring-gray-300"
+                                                focus:outline-none focus:ring-2 focus:ring-gray-300 hover:cursor-pointer"
                                             >
                                                 Anterior
                                             </button>
@@ -640,7 +651,10 @@ export const RejectionIndex = () => {
                                             <button
                                                 onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPage))}
                                                 disabled={currentPage === totalPage}
-                                                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors focus:outline-none focus:ring-2 focus:ring-gray-300"
+                                                className="px-4 py-2 text-sm font-medium text-gray-700 bg-white 
+                                                border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 
+                                                disabled:cursor-not-allowed transition-colors focus:outline-none focus:ring-2 
+                                                focus:ring-gray-300 hover:cursor-pointer"
                                             >
                                                 Siguiente
                                             </button>
