@@ -12,7 +12,8 @@ import Swal from "sweetalert2";
 import { SignaturePad } from "../../components/SignaturePad/SignaturePad";
 import ErrorBoundary from "../../components/ErrorBoundary/ErrorBoundary";
 import type { Rejections } from "../../interfaces/Rejections";
-import { Table } from "../../components/Table/Table";
+import { FaWhatsapp } from "react-icons/fa";
+import { PiMicrosoftOutlookLogoFill } from "react-icons/pi";
 
 export const RejectionIndex = () => {
     const [formData, setFormData] = useState<RejectionFormData>({
@@ -204,7 +205,7 @@ export const RejectionIndex = () => {
             <img
                 src={firstUrl}
                 alt="Rechazo"
-                className="h-15 w-15 object-cover rounded-full border border-gray-200"
+                className="h-20 w-20 object-cover rounded-full border border-gray-200"
                 onError={(e) => {
                     (e.target as HTMLImageElement).src = "Sin evidencia";
                 }}
@@ -371,6 +372,18 @@ export const RejectionIndex = () => {
         }
     };
 
+    const formatteDate = (date: string) => {
+        if (!date) return "-";
+
+        const newDate = new Date();
+        if (isNaN(newDate.getDate())) return "-";
+        const day = String(newDate.getDate()).padStart(2, "0");
+        const month = String(newDate.getMonth() + 1).padStart(2, "0");
+        const year = newDate.getFullYear();
+
+        return `${day}/${month}/${year}`;
+    }
+
     const removeFile = (index: number) => {
         setSelectedFiles(prev => prev.filter((_, i) => i !== index));
     };
@@ -404,35 +417,6 @@ export const RejectionIndex = () => {
         label: action.name
     }));
 
-    const columns = [
-        {
-            name: " ",
-            cell: (row: Rejections) => renderFirstImage(row.image),
-        },
-        {
-            name: "Número de parte",
-            selector: (row: Rejections) => row.partNumber,
-        },
-        {
-            name: "Descripción",
-            selector: (row: Rejections) => row.description
-        },
-        {
-            name: "Fecha",
-            selector: (row: Rejections) => {
-                if (!row.registrationDate) return "-";
-
-                const date = new Date(row.registrationDate);
-                if (isNaN(date.getDate())) return "-";
-                const day = String(date.getDate()).padStart(2, "0");
-                const month = String(date.getMonth() + 1).padStart(2, "0");
-                const year = date.getFullYear();
-
-                return `${day}/${month}/${year}`;
-            }
-        }
-    ];
-
     return (
         <>
             <div className="min-h-screen bg-gray-50 p-4 md:p-8">
@@ -461,11 +445,49 @@ export const RejectionIndex = () => {
                                 </div>
                             ) : (
                                 <>
-                                    <Table
-                                        columns={columns}
-                                        data={rejection}
-                                        pagination
-                                    />
+                                    {
+                                        rejection.map((item) => (
+                                            <article
+                                                key={item.id}
+                                                className="rounded-xl border border-gray-200 bg-white p-4 
+                                                    shadow-sm hover:shadow transition-shadow">
+                                                <time className="block text-xs text-gray-500 mb-3">
+                                                    {formatteDate(item.registrationDate)}
+                                                </time>
+
+                                                <div className="flex items-start gap-3">
+                                                    <div className="flex-shrink-0">
+                                                        {renderFirstImage(item.image)}
+                                                    </div>
+
+                                                    <h3 className="text-base font-medium text-gray-900 leading-tight
+                                                        flex-1 min-w-0">
+                                                        {item.description}
+                                                    </h3>
+                                                </div>
+
+
+                                                <div className="mt-4 flex justify-end gap-2">
+                                                    <button
+                                                        type="button"
+                                                        aria-label="Enviar por WhatsApp"
+                                                        className="flex items-center justify-center rounded-full bg-green-100
+                                                            w-9 h-9 text-green-600 hover:bg-green-200 transition-colors hover:cursor-pointer"
+                                                    >
+                                                        <FaWhatsapp className="text-lg" />
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        aria-label="Enviar por correo"
+                                                        className="flex items-center justify-center rounded-full bg-blue-100 
+                                                            w-9 h-9 text-blue-600 hover:bg-blue-200 transition-colors hover:cursor-pointer"
+                                                    >
+                                                        <PiMicrosoftOutlookLogoFill className="text-lg" />
+                                                    </button>
+                                                </div>
+                                            </article>
+                                        ))
+                                    }
                                 </>
                             )
                         }
