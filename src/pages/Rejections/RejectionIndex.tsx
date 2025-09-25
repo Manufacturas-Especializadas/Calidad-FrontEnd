@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { OffCanvas } from "../../components/OffCanvas/OffCanvas";
 import { FormInput } from "../../components/FormInput/FormInput";
 import { rejectionService, type RejectionFormData } from "../../api/services/RejectionService";
@@ -54,6 +54,16 @@ export const RejectionIndex = () => {
         numberOfPieces: "",
         operatorPayroll: ""
     });
+
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 5;
+
+    const totalPage = Math.ceil(rejection.length / itemsPerPage);
+    const currentItems = useMemo(() => {
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        return rejection.slice(startIndex, startIndex + itemsPerPage);
+    }, [rejection, currentPage, itemsPerPage]);
+
 
     const handleOpenOffcanvas = () => setIsOffcanvasOpen(true);
     const handleCloseOffcanvas = () => setIsOffcanvasOpen(false);
@@ -159,16 +169,17 @@ export const RejectionIndex = () => {
         loadNextFolio();
     }, [isOffcanvasOpen]);
 
+    const loadRejection = async () => {
+        try {
+            const data = await rejectionService.getRejections();
+            setRejection(data || []);
+        } catch (error: any) {
+            console.error("Error al obtener la lista: ", error);
+            setRejection([]);
+        }
+    };
+
     useEffect(() => {
-        const loadRejection = async () => {
-            try {
-                const data = await rejectionService.getRejections();
-                setRejection(data || []);
-            } catch (error: any) {
-                console.error("Error al obtener la lista: ", error);
-                setRejection([]);
-            }
-        };
         loadRejection();
     }, []);
 
@@ -344,6 +355,8 @@ export const RejectionIndex = () => {
                     showConfirmButton: false
                 });
 
+                await loadRejection();
+
             } else {
                 Swal.fire({
                     title: "Error al registrar",
@@ -372,17 +385,15 @@ export const RejectionIndex = () => {
         }
     };
 
-    const formatteDate = (date: string) => {
-        if (!date) return "-";
-
-        const newDate = new Date();
-        if (isNaN(newDate.getDate())) return "-";
-        const day = String(newDate.getDate()).padStart(2, "0");
-        const month = String(newDate.getMonth() + 1).padStart(2, "0");
-        const year = newDate.getFullYear();
-
+    const formatDate = (dateString: string) => {
+        if (!dateString) return "-";
+        const date = new Date(dateString);
+        if (isNaN(date.getTime())) return "-";
+        const day = String(date.getDate()).padStart(2, "0");
+        const month = String(date.getMonth() + 1).padStart(2, "0");
+        const year = date.getFullYear();
         return `${day}/${month}/${year}`;
-    }
+    };;
 
     const removeFile = (index: number) => {
         setSelectedFiles(prev => prev.filter((_, i) => i !== index));
@@ -445,48 +456,66 @@ export const RejectionIndex = () => {
                                 </div>
                             ) : (
                                 <>
-                                    {
-                                        rejection.map((item) => (
-                                            <article
-                                                key={item.id}
-                                                className="rounded-xl border border-gray-200 bg-white p-4 
-                                                    shadow-sm hover:shadow transition-shadow">
-                                                <time className="block text-xs text-gray-500 mb-3">
-                                                    {formatteDate(item.registrationDate)}
-                                                </time>
+                                    <div className="space-y-4">
+                                        {
+                                            currentItems.map((item) => (
+                                                <article key={item.id} className="rounded-xl border border-gray-200 bg-white 
+                                                    p-4 shadow-sm hover:shadow transition-shadow">
+                                                    <time className="block text-xs text-gray-500 mb-3">
+                                                        {formatDate(item.registrationDate)}
+                                                    </time>
 
-                                                <div className="flex items-start gap-3">
-                                                    <div className="flex-shrink-0">
-                                                        {renderFirstImage(item.image)}
+                                                    <div className="flex items-start gap-3">
+                                                        <div className="flex-shrink-0">
+                                                            {renderFirstImage(item.image)}
+                                                        </div>
+                                                        <h3 className="text-base font-medium text-gray-900 leading-tight flex-1 min-w-0">
+                                                            {item.description}
+                                                        </h3>
                                                     </div>
 
-                                                    <h3 className="text-base font-medium text-gray-900 leading-tight
-                                                        flex-1 min-w-0">
-                                                        {item.description}
-                                                    </h3>
-                                                </div>
+                                                    <div className="mt-4 flex justify-end gap-2">
+                                                        <button className="flex items-center justify-center rounded-full 
+                                                            bg-green-100 w-9 h-9 text-green-600 hover:bg-green-200 
+                                                            transition-colors hover:cursor-pointer">
+                                                            <FaWhatsapp className="text-lg" />
+                                                        </button>
+                                                        <button className="flex items-center justify-center rounded-full 
+                                                            bg-blue-100 w-9 h-9 text-blue-600 hover:bg-blue-200 
+                                                            transition-colors hover:cursor-pointer">
+                                                            <PiMicrosoftOutlookLogoFill className="text-lg" />
+                                                        </button>
+                                                    </div>
+                                                </article>
+                                            ))
+                                        }
+                                    </div>
+                                    {
+                                        totalPage > 1 && (
+                                            <div className="mt-6 flex items-center justify-between">
+                                                <button
+                                                    onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+                                                    disabled={currentPage === 1}
+                                                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300
+                                                        rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed hover:cursor-pointer"
+                                                >
+                                                    Anterior
+                                                </button>
 
+                                                <span className="text-sm text-gray-600">
+                                                    Página {currentPage} de {totalPage}
+                                                </span>
 
-                                                <div className="mt-4 flex justify-end gap-2">
-                                                    <button
-                                                        type="button"
-                                                        aria-label="Enviar por WhatsApp"
-                                                        className="flex items-center justify-center rounded-full bg-green-100
-                                                            w-9 h-9 text-green-600 hover:bg-green-200 transition-colors hover:cursor-pointer"
-                                                    >
-                                                        <FaWhatsapp className="text-lg" />
-                                                    </button>
-                                                    <button
-                                                        type="button"
-                                                        aria-label="Enviar por correo"
-                                                        className="flex items-center justify-center rounded-full bg-blue-100 
-                                                            w-9 h-9 text-blue-600 hover:bg-blue-200 transition-colors hover:cursor-pointer"
-                                                    >
-                                                        <PiMicrosoftOutlookLogoFill className="text-lg" />
-                                                    </button>
-                                                </div>
-                                            </article>
-                                        ))
+                                                <button
+                                                    onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPage))}
+                                                    disabled={currentPage === totalPage}
+                                                    className="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300
+                                                        rounded-md hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed hover:cursor-pointer"
+                                                >
+                                                    Siguiente
+                                                </button>
+                                            </div>
+                                        )
                                     }
                                 </>
                             )
