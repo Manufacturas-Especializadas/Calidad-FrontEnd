@@ -15,7 +15,8 @@ export const API_CONFIG = {
             actions: "/api/Rejections/GetContainmentAction",
             folios: "/api/Rejections/GetNextFolio",
             rejections: "/api/Rejections/GetRejections",
-            create: "/api/Rejections/Create"
+            create: "/api/Rejections/Create",
+            delete: "/api/Rejections/Delete/"
         }
     }
 }
