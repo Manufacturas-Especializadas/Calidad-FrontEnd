@@ -39,6 +39,7 @@ class RejectionService {
     private clientEndpoint = API_CONFIG.endpoints.rejects.clients;
     private actionEndpoint = API_CONFIG.endpoints.rejects.actions;
     private folioEndpoint = API_CONFIG.endpoints.rejects.folios;
+    private downloadEndpoint = API_CONFIG.endpoints.rejects.download;
     private createEndpoint = API_CONFIG.endpoints.rejects.create;
     private deleteEndpoint = API_CONFIG.endpoints.rejects.delete;
     private rejectionEndpoint = API_CONFIG.endpoints.rejects.rejections;
@@ -90,6 +91,19 @@ class RejectionService {
         const url = `${this.conditionEndpoint}?defectId=${defectId}`
 
         return apiClient.get<Condition[]>(url);
+    }
+
+    async downloadExcel(): Promise<Blob> {
+        const response = await fetch(`${API_CONFIG.baseUrl}${this.downloadEndpoint}`, {
+            method: 'POST',
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Error ${response.status}: ${errorText || response.statusText}`);
+        }
+
+        return await response.blob();
     }
 
     async createRejection(formData: RejectionFormData, files: File[]): Promise<RejectResponse> {
