@@ -12,4 +12,5 @@ export interface Rejections {
     lines: string;
     condition: string;
     action: string;
+    folio: number;
 }
