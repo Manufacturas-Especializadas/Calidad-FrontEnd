@@ -40,6 +40,7 @@ class RejectionService {
     private actionEndpoint = API_CONFIG.endpoints.rejects.actions;
     private folioEndpoint = API_CONFIG.endpoints.rejects.folios;
     private createEndpoint = API_CONFIG.endpoints.rejects.create;
+    private deleteEndpoint = API_CONFIG.endpoints.rejects.delete;
     private rejectionEndpoint = API_CONFIG.endpoints.rejects.rejections;
 
     private dataURLToBlob(dataURL: string): Blob {
@@ -77,6 +78,10 @@ class RejectionService {
 
     async getRejections(): Promise<Rejections[]> {
         return apiClient.get<Rejections[]>(this.rejectionEndpoint);
+    }
+
+    async deleteReject(id: number | string): Promise<RejectResponse> {
+        return apiClient.delete<RejectResponse>(`${this.deleteEndpoint}${id}`);
     }
 
     async getConditionByDefect(defectId: Number): Promise<Condition[]> {
