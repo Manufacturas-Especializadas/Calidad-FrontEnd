@@ -1,9 +1,182 @@
+import { useEffect, useState } from "react";
+import type { Rejections } from "../../interfaces/Rejections";
+import { rejectionService } from "../../api/services/RejectionService";
+import { Table } from "../../components/Table/Table";
+import Swal from "sweetalert2";
 
 export const AdminIndex = () => {
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+    const [rejection, setRejection] = useState<Rejections[]>([]);
+    const [actionLoading, setActionLoading] = useState<number | null>(null);
+
+    useEffect(() => {
+        const loadRejection = async () => {
+            try {
+                const data = await rejectionService.getRejections();
+                setRejection(data);
+                setError(null);
+            } catch (error: any) {
+                console.error("Error loading rejections: ", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+        loadRejection();
+    }, []);
+
+    const handleView = (row: Rejections) => {
+        Swal.fire({
+            title: `DETALLES DE RECHAZO`,
+            html: `
+                <div style="text-align: left; line-height: 1.6; font-size: 14px;">
+                    <p><strong>Fecha:</strong> ${formattedDate(row.registrationDate)}</p>
+                    <p><strong>Inspector:</strong> ${row.insepector || '—'}</p>
+                    <p><strong>Número de parte:</strong> ${row.partNumber || '—'}</p>
+                    <p><strong>Cantidad:</strong> ${row.numberOfPieces || '—'}</p>
+                    <p><strong>Defecto:</strong> ${row.defects || '—'}</p>
+                    <p><strong>Condición:</strong> ${row.condition || '—'}</p>
+                    <p><strong>Cliente:</strong> ${row.clients || '-'}</p>
+                    <p><strong>Descripción:</strong> ${row.description || '—'}</p>
+                    <p><strong>Folio:</strong> ${row.folio}</p>
+                </div>
+            `,
+        });
+    };
+
+    const handleDelete = async (row: Rejections) => {
+        const result = await Swal.fire({
+            title: "¿Estas seguro?",
+            text: `Vas eliminar el rechazo de: ${row.insepector}`,
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#3085d6",
+            confirmButtonText: "Si, eliminar",
+            cancelButtonText: "Cancelar"
+        });
+
+        if (!result.isConfirmed) {
+            return;
+        }
+
+        setActionLoading(row.id);
+
+        try {
+            const response = await rejectionService.deleteReject(row.id);
+            if (response.success) {
+                setRejection(rejection.filter(rejection => rejection.id !== row.id));
+
+                Swal.fire({
+                    title: "¡Eliminado!",
+                    text: "El rechazo ha sido eliminado correctamente",
+                    icon: "success",
+                    confirmButtonText: "Aceptar"
+                });
+            } else {
+                Swal.fire({
+                    title: "Error",
+                    text: response.message || "No se pudo eliminar el rechazo",
+                    icon: "error",
+                    confirmButtonText: "Aceptar"
+                });
+            }
+        } catch (error: any) {
+            console.error("Error al eliminar: ", error);
+            Swal.fire({
+                title: "Error",
+                text: "Hubo un problema al comunicarse con el servidor",
+                icon: "error",
+                confirmButtonText: "Aceptar"
+            });
+        } finally {
+            setActionLoading(null);
+        }
+    };
+
+    const formattedDate = (date: string) => {
+        if (!date) return "-";
+
+        const parsedDate = new Date(date);
+        if (isNaN(parsedDate.getTime())) return "Fecha inválida";
+
+        const day = String(parsedDate.getDate()).padStart(2, "0");
+        const month = String(parsedDate.getMonth() + 1).padStart(2, "0");
+        const year = parsedDate.getFullYear();
+
+        return `${day}/${month}/${year}`;
+    };
+
+    const columns = [
+        {
+            name: "Fecha",
+            selector: (row: Rejections) => formattedDate(row.registrationDate)
+        },
+        {
+            name: "Inspector",
+            selector: (row: Rejections) => row.insepector
+        },
+        {
+            name: "Número de parte",
+            selector: (row: Rejections) => row.partNumber
+        },
+        {
+            name: "Cantidad",
+            selector: (row: Rejections) => row.numberOfPieces
+        },
+        {
+            name: "Defecto",
+            selector: (row: Rejections) => row.defects
+        },
+        {
+            name: "Condición",
+            selector: (row: Rejections) => row.condition
+        },
+        {
+            name: "Descripción",
+            selector: (row: Rejections) => row.description
+        }
+    ];
+
     return (
         <>
-            <div className="min-h-screen p-4 md:p-6">
+            <div className="min-h-screen bg-gray-50 p-4 md:p-6">
+                <div className="max-w-7xl mx-auto">
+                    <header className="mb-6 md:mb-8">
+                        <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
+                            Panel de administración
+                        </h1>
+                        <p className="mt-1 text-sm md:text-base text-gray-600">
+                            Gestiona los recursos de tu plataforma
+                        </p>
+                    </header>
 
+                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                        <div className="p-4 md:p-6">
+                            {loading ? (
+                                <div className="py-12 text-center text-gray-500">
+                                    Cargando datos...
+                                </div>
+                            ) : error ? (
+                                <div className="py-12 text-center">
+                                    <div className="text-red-500 font-medium mb-2">{error}</div>
+                                    <button className="bg-primary text-white px-4 py-2 rounded-md 
+                                        hover:bg-secondary transition-all hover:cursor-pointer">
+                                        Reintentar
+                                    </button>
+                                </div>
+                            ) : (
+                                <Table<Rejections>
+                                    columns={columns}
+                                    data={rejection}
+                                    onView={handleView}
+                                    onDelete={handleDelete}
+                                    actionLoading={actionLoading}
+                                />
+                            )}
+                        </div>
+                    </div>
+                </div>
             </div>
         </>
     )
