@@ -15,6 +15,7 @@ export const API_CONFIG = {
             actions: "/api/Rejections/GetContainmentAction",
             folios: "/api/Rejections/GetNextFolio",
             rejections: "/api/Rejections/GetRejections",
+            download: "/api/Rejections/DownloadExcel",
             create: "/api/Rejections/Create",
             delete: "/api/Rejections/Delete/"
         }
