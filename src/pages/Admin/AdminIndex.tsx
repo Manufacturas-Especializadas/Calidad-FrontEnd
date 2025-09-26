@@ -3,6 +3,7 @@ import type { Rejections } from "../../interfaces/Rejections";
 import { rejectionService } from "../../api/services/RejectionService";
 import { Table } from "../../components/Table/Table";
 import Swal from "sweetalert2";
+import { FaFileExcel } from "react-icons/fa";
 
 export const AdminIndex = () => {
     const [loading, setLoading] = useState(true);
@@ -150,6 +151,20 @@ export const AdminIndex = () => {
                             Gestiona los recursos de tu plataforma
                         </p>
                     </header>
+
+                    <div className="mb-4 flex justify-end">
+                        <button
+                            disabled={loading || rejection.length === 0}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-md text-white font-medium transition-all ${loading || rejection.length === 0
+                                    ? "bg-gray-400 cursor-not-allowed"
+                                    : "bg-green-600 hover:bg-green-700"
+                                } hover:cursor-pointer`}
+                            aria-label="Descargar en Excel"
+                        >
+                            <FaFileExcel className="text-xl" />
+                            <span>Exportar a Excel</span>
+                        </button>
+                    </div>
 
                     <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                         <div className="p-4 md:p-6">
