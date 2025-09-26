@@ -174,7 +174,7 @@ const ActionButton = ({
             type="button"
             onClick={onClick}
             disabled={disabled || loading}
-            className={`${baseClasses} ${colors[color]} ${disabled || loading ? "opacity-50 cursor-not-allowed" : ""}`}
+            className={`${baseClasses} ${colors[color]} ${disabled || loading ? "opacity-50 cursor-not-allowed" : ""} hover:cursor-pointer`}
             aria-label={label}
         >
             {loading ? (
