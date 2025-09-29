@@ -17,7 +17,7 @@ export const Login = () => {
     });
 
     const [error, setError] = useState<string>("");
-    const [isSubmitting, setIsSubmitting] = useState<boolean>(false); // ← Estado de carga
+    const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
     const navigate = useNavigate();
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -52,7 +52,7 @@ export const Login = () => {
                 return;
             }
 
-            localStorage.setItem("accessToken", response.accessToken);
+            localStorage.setItem("token", response.accessToken);
             localStorage.setItem("refreshToken", response.refreshToken);
 
             Swal.fire({
