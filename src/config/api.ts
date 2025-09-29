@@ -7,6 +7,11 @@ if (!API_BASE_URL) {
 export const API_CONFIG = {
     baseUrl: API_BASE_URL,
     endpoints: {
+        auth: {
+            login: "/api/Auth/Login",
+            register: "/api/Auth/Register",
+            roles: "/api/Auth/GetRoles"
+        },
         rejects: {
             defects: "/api/Rejections/GetDefects",
             conditions: "/api/Rejections/GetConditionByDefect",

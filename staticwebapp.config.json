@@ -1,0 +1,16 @@
+{
+    "navigationFallback": {
+        "rewrite": "/index.html",
+        "exclude": [
+            "/assets/*",
+            "/favicon.ico"
+        ]
+    },
+    "routes": [
+        {
+            "allowedIpAddress": [
+                "200.76.19.130"
+            ]
+        }
+    ]
+}
