@@ -8,7 +8,9 @@
     },
     "routes": [
         {
-            "allowedIpAddress": [
+            "route": "/*",
+            "allowedRoles": [],
+            "allowedIpAddresses": [
                 "200.76.19.130"
             ]
         }
