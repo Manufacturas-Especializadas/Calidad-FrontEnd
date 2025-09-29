@@ -37,19 +37,33 @@ class ApiClient {
         return this.request<T>(endpoint, { method: 'GET' });
     }
 
-    async post<T>(endpoint: string, data: FormData): Promise<T> {
+    async post<T>(endpoint: string, data: any): Promise<T> {
         const fullUrl = `${this.baseUrl}${endpoint}`;
-        const response = await fetch(fullUrl, {
-            method: "POST",
-            body: data,
-        });
 
-        if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(errorText || "Error en la solicitud");
+        if (data instanceof FormData) {
+            const response = await fetch(fullUrl, {
+                method: "POST",
+                body: data,
+            });
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(errorText || "Error en la solicitud");
+            }
+            return response.json();
+        } else {
+            const response = await fetch(fullUrl, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify(data),
+            });
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(errorText || "Error en la solicitud");
+            }
+            return response.json();
         }
-
-        return response.json();
     }
 
     put<T>(endpoint: string, body: any) {
