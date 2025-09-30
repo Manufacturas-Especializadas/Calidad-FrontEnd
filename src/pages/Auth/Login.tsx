@@ -4,6 +4,7 @@ import { Button } from "../../components/Button/Button";
 import { rejectionService } from "../../api/services/RejectionService";
 import { useNavigate } from "react-router";
 import Swal from "sweetalert2";
+import { useAuth } from "../../context/AuthContext";
 
 interface LoginForm {
     payRollNumber: number;
@@ -11,6 +12,8 @@ interface LoginForm {
 }
 
 export const Login = () => {
+    const { login } = useAuth();
+
     const [formData, setFormData] = useState<LoginForm>({
         payRollNumber: 0,
         password: ""
@@ -52,7 +55,8 @@ export const Login = () => {
                 return;
             }
 
-            localStorage.setItem("token", response.accessToken);
+            // localStorage.setItem("token", response.accessToken);
+            login(response.accessToken)
             localStorage.setItem("refreshToken", response.refreshToken);
 
             Swal.fire({
