@@ -6,14 +6,21 @@ import { dataNavigation } from "../../data/dataNavigation";
 import { useAuth } from "../../context/AuthContext";
 
 export const Navbar = () => {
+    const { user, loading, logout } = useAuth();
     const [isOpen, setIsOpen] = useState(false);
-    const { user, logout } = useAuth();
     const navigate = useNavigate();
-
     const handleNavClick = (path: string) => {
         navigate(path);
         setIsOpen(false);
     };
+
+    if (loading) {
+        return null;
+    }
+
+    if (!user) {
+        return null;
+    }
 
     const handleLogout = async () => {
         try {
