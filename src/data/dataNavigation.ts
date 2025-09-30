@@ -6,12 +6,17 @@ export const dataNavigation = [
     },
     {
         id: 2,
-        name: "Auditoría a procesos productivos FCD's",
+        name: "Auditoría a procesos FCD's",
         path: "/auditoria-procesos-productivos"
     },
     {
         id: 3,
-        name: "Auditoría a producto terminado ACD's",
+        name: "Auditoría a producto ACD's",
         path: "/auditoria-producto-terminado"
+    },
+    {
+        id: 4,
+        name: "Scrap",
+        path: "/scrap"
     }
 ];
