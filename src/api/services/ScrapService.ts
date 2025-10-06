@@ -22,6 +22,7 @@ export interface ScrapFormData {
     defectId: number;
     machineId: number;
     rdm: string;
+    weight: string;
 };
 
 export interface ScrapResponse {
