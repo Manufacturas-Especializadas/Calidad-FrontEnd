@@ -5,9 +5,10 @@ import { rejectionService } from "../../api/services/RejectionService";
 import { useNavigate } from "react-router";
 import Swal from "sweetalert2";
 import { useAuth } from "../../context/AuthContext";
+import { FormInput } from "../../components/FormInput/FormInput";
 
 interface LoginForm {
-    payRollNumber: number;
+    payRollNumber: string;
     password: string;
 }
 
@@ -15,7 +16,7 @@ export const Login = () => {
     const { login } = useAuth();
 
     const [formData, setFormData] = useState<LoginForm>({
-        payRollNumber: 0,
+        payRollNumber: "",
         password: ""
     });
 
@@ -23,11 +24,12 @@ export const Login = () => {
     const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
     const navigate = useNavigate();
 
-    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
+
         setFormData(prev => ({
             ...prev,
-            [name]: name === "payRollNumber" ? (value === "" ? 0 : Number(value)) : value
+            [name]: value
         }));
     };
 
@@ -36,14 +38,15 @@ export const Login = () => {
         setError("");
         setIsSubmitting(true);
 
-        if (formData.payRollNumber <= 0 || !formData.password.trim()) {
-            setError("Por favor, ingresa un número de nómina válido y una contraseña.");
+        const payRollNumber = formData.payRollNumber.trim();
+        if (!payRollNumber || isNaN(Number(payRollNumber)) || Number(payRollNumber) <= 0) {
+            setError("Por favor, ingresa un número de nómina válido.");
             setIsSubmitting(false);
             return;
         }
 
         try {
-            const response = await rejectionService.login(formData.payRollNumber, formData.password);
+            const response = await rejectionService.login(Number(payRollNumber), formData.password);
 
             if (!response || response.isSuccess === false) {
                 Swal.fire({
@@ -102,31 +105,22 @@ export const Login = () => {
 
                     <form onSubmit={handleSubmit} className="space-y-6">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700">
-                                Número de nómina
-                            </label>
-                            <input
-                                type="number"
+                            <FormInput
+                                label="Número de nómina"
+                                type="text"
                                 name="payRollNumber"
-                                value={formData.payRollNumber || ""}
+                                value={formData.payRollNumber}
                                 onChange={handleInputChange}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md 
-                                focus:ring-blue-500 focus:border-blue-500"
-                                min="1"
                                 required
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700">
-                                Contraseña
-                            </label>
-                            <input
+                            <FormInput
+                                label="Contraseña"
                                 type="password"
                                 name="password"
                                 value={formData.password}
                                 onChange={handleInputChange}
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md 
-                                focus:ring-blue-500 focus:border-blue-500"
                                 required
                             />
                         </div>

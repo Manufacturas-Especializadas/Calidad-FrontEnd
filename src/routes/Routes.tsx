@@ -7,6 +7,7 @@ import { Login } from "../pages/Auth/Login";
 import { Register } from "../pages/Auth/Register";
 import { ProtectedRoute } from "../components/ProtectedRoute/ProtectedRoute";
 import { PublicRoute } from "../components/PublicRoute/PublicRoute";
+import { IndexScrap } from "../pages/Scrap/Index";
 
 export const MyRoutes = () => {
     return (
@@ -31,6 +32,9 @@ export const MyRoutes = () => {
 
                     {/* Rejections */}
                     <Route path="/" element={<RejectionIndex />} />
+
+                    {/* Scrap */}
+                    <Route path="/scrap" element={<IndexScrap />} />
 
                     {/* ProcessAudit */}
                     <Route path="/auditoria-procesos-productivos" element={<ProcessAudit />} />
