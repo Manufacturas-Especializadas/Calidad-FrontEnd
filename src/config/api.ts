@@ -23,6 +23,17 @@ export const API_CONFIG = {
             download: "/api/Rejections/DownloadExcel",
             create: "/api/Rejections/Create",
             delete: "/api/Rejections/Delete/"
+        },
+        scrap: {
+            scrap: "/api/Scrap/GetScrap",
+            defects: "/api/Scrap/GetDefectByTypeScrap",
+            typeScrap: "/api/Scrap/GetTypeScrap",
+            material: "/api/Scrap/GetMaterial",
+            machines: "/api/Scrap/GetMachineCodeByProcess",
+            process: "/api/Scrap/GetProcessByLine",
+            lines: "/api/Scrap/GetLines",
+            shifts: "/api/Scrap/GetShifts",
+            create: "/api/Scrap/Create"
         }
     }
 }
