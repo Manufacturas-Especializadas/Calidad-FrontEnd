@@ -2,20 +2,30 @@ import type React from "react";
 import { Button } from "../Button/Button";
 import type { Scrap } from "../../interfaces/Scrap";
 import { FaRecycle, FaExclamationTriangle, FaRedo, FaWeightHanging, FaIndustry } from "react-icons/fa";
+import { useEffect } from "react";
 
 interface Props {
     loading: boolean;
     error: string | null;
     onRetry: () => void;
     data: Scrap[] | null;
+    reloadTrigger?: number
 }
 
 const ScrapList: React.FC<Props> = ({
     loading,
     error,
     onRetry,
-    data
+    data,
+    reloadTrigger
 }) => {
+
+    useEffect(() => {
+        if (reloadTrigger !== undefined) {
+            onRetry();
+        }
+    }, [reloadTrigger]);
+
     if (loading) {
         return (
             <div className="bg-white rounded-2xl shadow-md border border-gray-200 p-8 flex flex-col items-center justify-center min-h-[220px]">
