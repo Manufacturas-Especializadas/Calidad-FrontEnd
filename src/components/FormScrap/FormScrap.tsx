@@ -11,7 +11,11 @@ import type { ScDefects } from "../../interfaces/ScDefects";
 import Swal from "sweetalert2";
 import { Button } from "../Button/Button";
 
-export const FormScrap = () => {
+interface Props {
+    onSuccess?: () => void;
+};
+
+export const FormScrap = ({ onSuccess }: Props) => {
     const [formData, setFormData] = useState<ScrapFormData>({
         shiftId: 0,
         lineId: 0,
@@ -24,7 +28,8 @@ export const FormScrap = () => {
         typeScrapId: 0,
         defectId: 0,
         machineId: 0,
-        rdm: ""
+        rdm: "",
+        weight: ""
     });
     const [shifts, setShifts] = useState<Shift[]>([]);
     const [lines, setLines] = useState<Lines[]>([]);
@@ -213,8 +218,11 @@ export const FormScrap = () => {
                 typeScrapId: 0,
                 defectId: 0,
                 machineId: 0,
-                rdm: ""
+                rdm: "",
+                weight: ""
             });
+
+            onSuccess?.();
 
         } catch (error: any) {
             Swal.close();
@@ -352,6 +360,14 @@ export const FormScrap = () => {
                     label="Defecto"
                     name="defectId"
                     options={defectsOptions}
+                    onChange={handleInputChange}
+                />
+
+                <FormInput
+                    type="text"
+                    label="Peso(kg)"
+                    name="weight"
+                    value={formData.weight}
                     onChange={handleInputChange}
                 />
 
