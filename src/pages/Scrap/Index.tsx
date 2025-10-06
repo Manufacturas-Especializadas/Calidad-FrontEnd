@@ -11,6 +11,7 @@ export const IndexScrap = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [scrap, setScrap] = useState<Scrap[]>([]);
+    const [tablekey, setTableKey] = useState(0);
 
     const handleOpenOffCanvas = () => setIsOffCanvaOpen(true);
     const handleCloseOffCanvas = () => setIsOffCanvaOpen(false);
@@ -32,7 +33,12 @@ export const IndexScrap = () => {
 
     useEffect(() => {
         loadData();
-    }, []);
+    }, [tablekey]);
+
+    const handleSuccess = () => {
+        handleCloseOffCanvas();
+        setTableKey(prev => prev + 1);
+    };
 
     return (
         <>
@@ -48,6 +54,7 @@ export const IndexScrap = () => {
                     error={error}
                     onRetry={loadData}
                     data={scrap}
+                    reloadTrigger={tablekey}
                 />
 
                 <OffCanvas
@@ -55,7 +62,7 @@ export const IndexScrap = () => {
                     isOpen={isOffCanvaOpen}
                     onClose={handleCloseOffCanvas}
                 >
-                    <FormScrap />
+                    <FormScrap onSuccess={handleSuccess} />
                 </OffCanvas>
             </div>
         </>
