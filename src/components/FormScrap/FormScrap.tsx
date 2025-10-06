@@ -279,6 +279,7 @@ export const FormScrap = ({ onSuccess }: Props) => {
                     type="select"
                     label="Turno"
                     name="shiftId"
+                    value={formData.shiftId.toString()}
                     options={shiftOptions}
                     onChange={handleInputChange}
                 />
@@ -287,6 +288,7 @@ export const FormScrap = ({ onSuccess }: Props) => {
                     type="select"
                     label="Linea"
                     name="lineId"
+                    value={formData.lineId.toString()}
                     options={lineOptions}
                     onChange={handleInputChange}
                 />
@@ -295,6 +297,7 @@ export const FormScrap = ({ onSuccess }: Props) => {
                     type="select"
                     label="Proceso"
                     name="processId"
+                    value={formData.processId.toString()}
                     options={processOptions}
                     onChange={handleInputChange}
                 />
@@ -303,6 +306,7 @@ export const FormScrap = ({ onSuccess }: Props) => {
                     type="select"
                     label="Código de máquina"
                     name="machineId"
+                    value={formData.machineId.toString()}
                     options={machinesOptions}
                     onChange={handleInputChange}
                 />
@@ -319,6 +323,7 @@ export const FormScrap = ({ onSuccess }: Props) => {
                     type="select"
                     label="Material"
                     name="materialId"
+                    value={formData.materialId.toString()}
                     options={materialOptions}
                     onChange={handleInputChange}
                 />
@@ -351,6 +356,7 @@ export const FormScrap = ({ onSuccess }: Props) => {
                     type="select"
                     label="Tipo de scrap"
                     name="typeScrapId"
+                    value={formData.typeScrapId.toString()}
                     options={typeScrapOptions}
                     onChange={handleInputChange}
                 />
@@ -359,6 +365,7 @@ export const FormScrap = ({ onSuccess }: Props) => {
                     type="select"
                     label="Defecto"
                     name="defectId"
+                    value={formData.defectId.toString()}
                     options={defectsOptions}
                     onChange={handleInputChange}
                 />
