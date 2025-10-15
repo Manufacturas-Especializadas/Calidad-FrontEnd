@@ -4,6 +4,7 @@ import { rejectionService } from "../../api/services/RejectionService";
 import { Table } from "../../components/Table/Table";
 import Swal from "sweetalert2";
 import { FaFileExcel } from "react-icons/fa";
+import { useNavigate } from "react-router";
 
 export const AdminIndex = () => {
     const [loading, setLoading] = useState(true);
@@ -11,6 +12,7 @@ export const AdminIndex = () => {
     const [downloadLoading, setDownloadLoading] = useState(false);
     const [rejection, setRejection] = useState<Rejections[]>([]);
     const [actionLoading, setActionLoading] = useState<number | null>(null);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const loadRejection = async () => {
@@ -199,7 +201,32 @@ export const AdminIndex = () => {
                         </p>
                     </header>
 
-                    <div className="mb-4 flex justify-end">
+                    <div className="mb-4 flex justify-between">
+                        <button
+                            onClick={() => navigate("/administrador-lineas")}
+                            className="flex items-center gap-2 px-4 py-2 rounded-md text-white font-medium transition-all
+                            bg-blue-600 hover:bg-blue-700 hover:cursor-pointer"
+                        >
+                            Administar Lineas
+                        </button>
+                        <button
+                            className="flex items-center gap-2 px-4 py-2 rounded-md text-white font-medium transition-all
+                            bg-blue-600 hover:bg-blue-700 hover:cursor-pointer"
+                        >
+                            Administra Clientes
+                        </button>
+                        <button
+                            className="flex items-center gap-2 px-4 py-2 rounded-md text-white font-medium transition-all
+                            bg-blue-600 hover:bg-blue-700 hover:cursor-pointer"
+                        >
+                            Administra Defectos
+                        </button>
+                        <button
+                            className="flex items-center gap-2 px-4 py-2 rounded-md text-white font-medium transition-all
+                            bg-blue-600 hover:bg-blue-700 hover:cursor-pointer"
+                        >
+                            Administra Condición de Defectos
+                        </button>
                         <button
                             onClick={handleDownloadExcel}
                             disabled={loading || rejection.length === 0}
