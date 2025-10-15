@@ -34,6 +34,13 @@ export const API_CONFIG = {
             lines: "/api/Scrap/GetLines",
             shifts: "/api/Scrap/GetShifts",
             create: "/api/Scrap/Create"
+        },
+        lines: {
+            lines: "/api/Lines/GetLines",
+            lineById: "/api/Lines/GetLineById/",
+            create: "/api/Lines/RegisterLine",
+            update: "/api/Lines/UpdateLine/",
+            delete: "/api/Lines/DeleteLine/"
         }
     }
 }

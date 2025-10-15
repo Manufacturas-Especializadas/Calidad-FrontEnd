@@ -8,6 +8,7 @@ import { Register } from "../pages/Auth/Register";
 import { ProtectedRoute } from "../components/ProtectedRoute/ProtectedRoute";
 import { PublicRoute } from "../components/PublicRoute/PublicRoute";
 import { IndexScrap } from "../pages/Scrap/Index";
+import { AdminLinesIndex } from "../pages/AdminLines/AdminLinesIndex";
 
 export const MyRoutes = () => {
     return (
@@ -29,6 +30,7 @@ export const MyRoutes = () => {
 
                     {/* Admin */}
                     <Route path="/administrador" element={<AdminIndex />} />
+                    <Route path="/administrador-lineas" element={<AdminLinesIndex />} />
 
                     {/* Rejections */}
                     <Route path="/" element={<RejectionIndex />} />
