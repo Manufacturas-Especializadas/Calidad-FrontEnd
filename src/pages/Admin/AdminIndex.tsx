@@ -217,6 +217,7 @@ export const AdminIndex = () => {
                             Administra Clientes
                         </button>
                         <button
+                            onClick={() => navigate("/administrador-defectos")}
                             className="flex items-center gap-2 px-4 py-2 rounded-md text-white font-medium transition-all
                             bg-blue-600 hover:bg-blue-700 hover:cursor-pointer"
                         >
