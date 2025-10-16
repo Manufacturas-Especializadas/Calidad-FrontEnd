@@ -12,10 +12,12 @@ import Swal from "sweetalert2";
 import { SignaturePad } from "../../components/SignaturePad/SignaturePad";
 import ErrorBoundary from "../../components/ErrorBoundary/ErrorBoundary";
 import type { Rejections } from "../../interfaces/Rejections";
-import { FaWhatsapp } from "react-icons/fa";
+import { FaFileExcel, FaWhatsapp } from "react-icons/fa";
 import { PiMicrosoftOutlookLogoFill } from "react-icons/pi";
+import { useAuth } from "../../context/AuthContext";
 
 export const RejectionIndex = () => {
+    const { user } = useAuth();
     const [formData, setFormData] = useState<RejectionFormData>({
         insepector: "",
         partNumber: "",
@@ -45,6 +47,7 @@ export const RejectionIndex = () => {
     const [isOffcanvasOpen, setIsOffcanvasOpen] = useState(false);
     const [nextFolio, setNextFolio] = useState<number>(0);
     const [loadingFolio, setLoadingFolio] = useState(false);
+    const [downloadLoading, setDownloadLoading] = useState(false);
 
     const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
     const [uploading, setUploading] = useState(false);
@@ -528,6 +531,51 @@ export const RejectionIndex = () => {
         window.location.href = mailtoUrl;
     };
 
+    const handleDownloadExcel = async () => {
+        if (downloadLoading) return;
+
+        setDownloadLoading(true);
+
+        try {
+            Swal.fire({
+                title: "Generando reporte...",
+                html: "Esto puede tardar unos segundos.",
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
+            const blob = await rejectionService.downloadExcel();
+
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `rechazos_${new Date().toISOString().split('T')[0]}.xlsx`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+
+            Swal.fire({
+                title: "¡Listo!",
+                text: "El archivo se ha descargado correctamente.",
+                icon: "success",
+                timer: 2000,
+                showConfirmButton: false
+            });
+        } catch (error) {
+            console.error("Error al descargar Excel:", error);
+            Swal.fire({
+                title: "Error",
+                text: "No se pudo generar el archivo. Verifica tu conexión o intenta más tarde.",
+                icon: "error"
+            });
+        } finally {
+            setDownloadLoading(false);
+        }
+    };
     const defectOptions = defects.map((defects) => ({
         value: defects.id.toString(),
         label: defects.name
@@ -553,11 +601,31 @@ export const RejectionIndex = () => {
         label: action.name
     }));
 
+    if (loading) {
+        return <div className="min-h-screen flex items-center justify-center">Cargando...</div>;
+    }
+
+    if (!user) {
+        return <div className="min-h-screen flex items-center justify-center text-red-500">No estás autenticado. Redirigiendo...</div>;
+    }
+
     return (
         <>
             <div className="min-h-screen bg-gray-50 p-4 md:p-8">
 
-                <div className="flex justify-end mb-4">
+                <div className="flex justify-between mb-4">
+                    <button
+                        onClick={handleDownloadExcel}
+                        disabled={loading || rejection.length === 0}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-md text-white font-medium transition-all ${loading || rejection.length === 0
+                            ? "bg-gray-400 cursor-not-allowed"
+                            : "bg-green-600 hover:bg-green-700"
+                            } hover:cursor-pointer`}
+                        aria-label="Descargar en Excel"
+                    >
+                        <FaFileExcel className="text-xl" />
+                        <span>Exportar a Excel</span>
+                    </button>
                     <Button variant="primary" size="sm" onClick={handleOpenOffcanvas}>
                         Registrar rechazo
                     </Button>
