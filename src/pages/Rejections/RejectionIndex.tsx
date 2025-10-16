@@ -15,6 +15,8 @@ import type { Rejections } from "../../interfaces/Rejections";
 import { FaFileExcel, FaWhatsapp } from "react-icons/fa";
 import { PiMicrosoftOutlookLogoFill } from "react-icons/pi";
 import { useAuth } from "../../context/AuthContext";
+import { RoleGuard } from "../../components/RoleGuard/RoleGuard";
+import { useNavigate } from "react-router";
 
 export const RejectionIndex = () => {
     const { user } = useAuth();
@@ -52,6 +54,8 @@ export const RejectionIndex = () => {
     const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
     const [uploading, setUploading] = useState(false);
     const [uploadErrors, setUploadErros] = useState<string[]>([]);
+
+    const navigate = useNavigate();
 
     const [validationErrors, setValidationErrors] = useState<Record<string, string>>({
         numberOfPieces: "",
@@ -614,18 +618,25 @@ export const RejectionIndex = () => {
             <div className="min-h-screen bg-gray-50 p-4 md:p-8">
 
                 <div className="flex justify-between mb-4">
-                    <button
-                        onClick={handleDownloadExcel}
-                        disabled={loading || rejection.length === 0}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-md text-white font-medium transition-all ${loading || rejection.length === 0
-                            ? "bg-gray-400 cursor-not-allowed"
-                            : "bg-green-600 hover:bg-green-700"
-                            } hover:cursor-pointer`}
-                        aria-label="Descargar en Excel"
-                    >
-                        <FaFileExcel className="text-xl" />
-                        <span>Exportar a Excel</span>
-                    </button>
+                    <RoleGuard allowedRoles={["Admin", "Ingeniero"]}>
+                        <button
+                            onClick={handleDownloadExcel}
+                            disabled={loading || rejection.length === 0}
+                            className={`flex items-center gap-2 px-4 py-2 rounded-md text-white font-medium transition-all ${loading || rejection.length === 0
+                                ? "bg-gray-400 cursor-not-allowed"
+                                : "bg-green-600 hover:bg-green-700"
+                                } hover:cursor-pointer`}
+                            aria-label="Descargar en Excel"
+                        >
+                            <FaFileExcel className="text-xl" />
+                            <span>Exportar a Excel</span>
+                        </button>
+                    </RoleGuard>
+                    <RoleGuard allowedRoles={["Admin"]}>
+                        <Button variant="primary" size="sm" onClick={() => navigate("/administrador")}>
+                            Admin
+                        </Button>
+                    </RoleGuard>
                     <Button variant="primary" size="sm" onClick={handleOpenOffcanvas}>
                         Registrar rechazo
                     </Button>
@@ -675,24 +686,26 @@ export const RejectionIndex = () => {
                                                     </div>
 
                                                     <div className="flex gap-2 mt-2 sm:mt-0 sm:ml-auto">
-                                                        <button
-                                                            aria-label="Enviar por WhatsApp"
-                                                            className="flex items-center justify-center w-10 h-10 rounded-lg 
-                                                            bg-green-50 text-green-600 hover:bg-green-100 transition-colors 
-                                                            focus:outline-none focus:ring-2 focus:ring-green-300 hover:cursor-pointer"
-                                                            onClick={() => sendToWhatsApp(item)}
-                                                        >
-                                                            <FaWhatsapp className="text-lg" />
-                                                        </button>
-                                                        <button
-                                                            aria-label="Enviar por Outlook"
-                                                            className="flex items-center justify-center w-10 h-10 rounded-lg 
-                                                            bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors 
-                                                            focus:outline-none focus:ring-2 focus:ring-blue-300 hover:cursor-pointer"
-                                                            onClick={() => sendToOutlook(item)}
-                                                        >
-                                                            <PiMicrosoftOutlookLogoFill className="text-lg" />
-                                                        </button>
+                                                        <RoleGuard allowedRoles={["Admin", "Ingeniero"]}>
+                                                            <button
+                                                                aria-label="Enviar por WhatsApp"
+                                                                className="flex items-center justify-center w-10 h-10 rounded-lg 
+                                                                bg-green-50 text-green-600 hover:bg-green-100 transition-colors 
+                                                                focus:outline-none focus:ring-2 focus:ring-green-300 hover:cursor-pointer"
+                                                                onClick={() => sendToWhatsApp(item)}
+                                                            >
+                                                                <FaWhatsapp className="text-lg" />
+                                                            </button>
+                                                            <button
+                                                                aria-label="Enviar por Outlook"
+                                                                className="flex items-center justify-center w-10 h-10 rounded-lg 
+                                                                bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors 
+                                                                focus:outline-none focus:ring-2 focus:ring-blue-300 hover:cursor-pointer"
+                                                                onClick={() => sendToOutlook(item)}
+                                                            >
+                                                                <PiMicrosoftOutlookLogoFill className="text-lg" />
+                                                            </button>
+                                                        </RoleGuard>
                                                     </div>
                                                 </div>
                                             </article>
