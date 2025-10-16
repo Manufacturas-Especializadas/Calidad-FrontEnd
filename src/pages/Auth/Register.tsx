@@ -72,7 +72,14 @@ export const Register = () => {
                 confirmButtonText: "Aceptar"
             });
 
-            navigate("/");
+            setFormData({
+                name: "",
+                payRollNumber: 0,
+                password: "",
+                roleName: "",
+            });
+
+            // navigate("/");
         } catch (err: any) {
             console.error("Error en registro:", err);
             const errorMessage = err?.response?.data?.message || err.message || "Error al registrar usuario. Inténtalo de nuevo.";
