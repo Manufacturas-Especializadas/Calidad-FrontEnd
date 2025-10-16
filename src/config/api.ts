@@ -55,6 +55,10 @@ export const API_CONFIG = {
             create: "/api/Defects/RegisterDefect",
             update: "/api/Defects/UpdateDefect/",
             delete: "/api/Defects/DeleteDefect/"
+        },
+        conditions: {
+            conditions: "/api/DefectCondition/GetCondition",
+            update: "/api/DefectCondition/UpdateDefectCondition/"
         }
     }
 }
