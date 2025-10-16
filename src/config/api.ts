@@ -48,6 +48,13 @@ export const API_CONFIG = {
             create: "/api/Clients/RegisterClient",
             update: "/api/Clients/UpdateClient/",
             delete: "/api/Clients/DeleteClient/"
+        },
+        defects: {
+            defects: "/api/Defects/GetDefects",
+            defectById: "/api/Defects/GetDefectById/",
+            create: "/api/Defects/RegisterDefect",
+            update: "/api/Defects/UpdateDefect/",
+            delete: "/api/Defects/DeleteDefect/"
         }
     }
 }
