@@ -50,22 +50,10 @@ class ApiClient {
         if (data instanceof FormData) {
             const response = await fetch(fullUrl, {
                 method: "POST",
-                headers: {
-                    ...authHeaders,
-                },
+                headers: { ...authHeaders },
                 body: data,
             });
-
-            if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(errorText || "Error en la solicitud");
-            }
-
-            const contentType = response.headers.get("content-type");
-            if (contentType && contentType.includes("application/json")) {
-                return response.json();
-            }
-            return null as unknown as T;
+            return response.json();
         } else {
             const response = await fetch(fullUrl, {
                 method: "POST",
@@ -75,21 +63,43 @@ class ApiClient {
                 },
                 body: JSON.stringify(data),
             });
-
-            if (!response.ok) {
-                const errorText = await response.text();
-                throw new Error(errorText || "Error en la solicitud");
-            }
-
             return response.json();
         }
     }
 
-    put<T>(endpoint: string, body: any) {
-        return this.request<T>(endpoint, {
-            method: 'PUT',
-            body: JSON.stringify(body),
-        });
+    async put<T>(endpoint: string, data: any): Promise<T> {
+        const fullUrl = `${this.baseUrl}${endpoint}`;
+        const authHeaders = this.getAuthHeaders();
+
+        if (data instanceof FormData) {
+            const response = await fetch(fullUrl, {
+                method: "PUT",
+                headers: { ...authHeaders },
+                body: data,
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(errorText || "Error en la solicitud PUT con FormData");
+            }
+            return response.json();
+
+        } else {
+            const response = await fetch(fullUrl, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                    ...authHeaders,
+                },
+                body: JSON.stringify(data),
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(errorText || "Error en la solicitud PUT con JSON");
+            }
+            return response.json();
+        }
     }
 
     delete<T>(endpoint: string) {

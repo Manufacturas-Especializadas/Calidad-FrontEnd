@@ -5,6 +5,9 @@ import { Table } from "../../components/Table/Table";
 import Swal from "sweetalert2";
 import { FaFileExcel } from "react-icons/fa";
 import { useNavigate } from "react-router";
+import { OffCanvas } from "../../components/OffCanvas/OffCanvas";
+import { FormRejection } from "../../components/FormRejection/FormRejection";
+
 
 export const AdminIndex = () => {
     const [loading, setLoading] = useState(true);
@@ -12,6 +15,8 @@ export const AdminIndex = () => {
     const [downloadLoading, setDownloadLoading] = useState(false);
     const [rejection, setRejection] = useState<Rejections[]>([]);
     const [actionLoading, setActionLoading] = useState<number | null>(null);
+    const [isOffcanvasOpen, setIsOffcanvasOpen] = useState(false);
+    const [selectedRejectionId, setSelectedRejectionId] = useState<number | null>(null);
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -157,6 +162,22 @@ export const AdminIndex = () => {
         return `${day}/${month}/${year}`;
     };
 
+    const handleCloseOffcanvas = () => {
+        setIsOffcanvasOpen(false);
+        setSelectedRejectionId(null);
+    };
+
+    const handleEdit = (row: Rejections) => {
+        setSelectedRejectionId(row.id);
+        setIsOffcanvasOpen(true);
+    };
+
+    const handleSuccess = () => {
+        handleCloseOffcanvas();
+        rejectionService.getRejections().then(data => setRejection(data));
+    };
+
+
     const columns = [
         {
             name: "Fecha",
@@ -181,10 +202,6 @@ export const AdminIndex = () => {
         {
             name: "Condición",
             selector: (row: Rejections) => row.condition
-        },
-        {
-            name: "Descripción",
-            selector: (row: Rejections) => row.description
         }
     ];
 
@@ -262,6 +279,7 @@ export const AdminIndex = () => {
                                     columns={columns}
                                     data={rejection}
                                     onView={handleView}
+                                    onEdit={handleEdit}
                                     onDelete={handleDelete}
                                     actionLoading={actionLoading}
                                 />
@@ -270,6 +288,18 @@ export const AdminIndex = () => {
                     </div>
                 </div>
             </div>
+
+            <OffCanvas
+                title={selectedRejectionId ? "Editar rechazo" : "Registrar rechazo"}
+                isOpen={isOffcanvasOpen}
+                onClose={handleCloseOffcanvas}
+            >
+                <FormRejection
+                    onSuccess={handleSuccess}
+                    rejectionId={selectedRejectionId ?? undefined}
+                />
+            </OffCanvas>
+
         </>
     )
 }

@@ -42,8 +42,10 @@ class RejectionService {
     private folioEndpoint = API_CONFIG.endpoints.rejects.folios;
     private downloadEndpoint = API_CONFIG.endpoints.rejects.download;
     private createEndpoint = API_CONFIG.endpoints.rejects.create;
+    private updateEndpoint = API_CONFIG.endpoints.rejects.update;
     private deleteEndpoint = API_CONFIG.endpoints.rejects.delete;
     private rejectionEndpoint = API_CONFIG.endpoints.rejects.rejections;
+    private rejectionByIdEndpoint = API_CONFIG.endpoints.rejects.rejectionById;
     private rolesEndpoint = API_CONFIG.endpoints.auth.roles;
     private authLoginEndpoint = API_CONFIG.endpoints.auth.login;
     private authRegisterEndpoint = API_CONFIG.endpoints.auth.register;
@@ -84,6 +86,12 @@ class RejectionService {
     async getRejections(): Promise<Rejections[]> {
         return apiClient.get<Rejections[]>(this.rejectionEndpoint);
     }
+
+    async getRejectionById(id: number): Promise<Rejections> {
+        const response = await apiClient.get<Rejections>(`${this.rejectionByIdEndpoint}${id}`);
+
+        return response;
+    };
 
     async getRoles(): Promise<Roles[]> {
         return apiClient.get<Roles[]>(this.rolesEndpoint);
@@ -152,6 +160,41 @@ class RejectionService {
 
         return response;
     }
+
+    async updateRejection(id: number, formData: RejectionFormData, files: File[]): Promise<RejectResponse> {
+        const form = new FormData();
+
+        form.append("insepector", formData.insepector);
+        form.append("partNumber", formData.partNumber);
+        form.append("numberOfPieces", (formData.numberOfPieces ?? 0).toString());
+        form.append("description", formData.description);
+        form.append("operatorPayroll", (formData.operatorPayroll ?? 0).toString());
+        form.append("registrationDate", formData.registrationDate); // ✅ agregado
+        form.append("folio", (formData.folio ?? 0).toString());
+        form.append("idDefect", (formData.idDefect ?? 0).toString());
+        form.append("idCondition", (formData.idCondition ?? 0).toString());
+        form.append("idLine", (formData.idLine ?? 0).toString());
+        form.append("idClient", (formData.idClient ?? 0).toString());
+        form.append("idContainmentaction", (formData.idContainmentaction ?? 0).toString());
+        form.append("image", formData.image ?? ""); // ✅ agregado
+
+        if (formData.informedSignature && formData.informedSignature.startsWith("data:image")) {
+            const blob = this.dataURLToBlob(formData.informedSignature);
+            const signatureFile = new File([blob], `signature_${Date.now()}.png`, { type: "image/png" });
+            form.append("photos", signatureFile);
+        }
+
+        files.forEach(file => {
+            form.append("photos", file);
+        });
+
+        const response = await apiClient.put<RejectResponse>(
+            `${this.updateEndpoint}${id}`,
+            form
+        );
+
+        return response;
+    };
 }
 
 export const rejectionService = new RejectionService();

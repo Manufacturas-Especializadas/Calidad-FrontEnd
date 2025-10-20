@@ -71,7 +71,6 @@ export const Table = <T extends { id?: number | string }>({
             },
             ignoreRowClick: true,
             width: "200px",
-            center: true,
         }
         : null;
 

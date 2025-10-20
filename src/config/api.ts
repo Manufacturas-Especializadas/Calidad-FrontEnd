@@ -20,8 +20,10 @@ export const API_CONFIG = {
             actions: "/api/Rejections/GetContainmentAction",
             folios: "/api/Rejections/GetNextFolio",
             rejections: "/api/Rejections/GetRejections",
+            rejectionById: "/api/Rejections/GetRejectionsById/",
             download: "/api/Rejections/DownloadExcel",
             create: "/api/Rejections/Create",
+            update: "/api/Rejections/Edit/",
             delete: "/api/Rejections/Delete/"
         },
         scrap: {
