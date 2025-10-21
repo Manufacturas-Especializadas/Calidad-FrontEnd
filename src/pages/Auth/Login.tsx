@@ -58,6 +58,15 @@ export const Login = () => {
                 return;
             }
 
+            if (!response.accessToken || typeof response.accessToken !== 'string') {
+                Swal.fire({
+                    title: "Error interno",
+                    text: "No se recibió un token de autenticación válido.",
+                    icon: "error"
+                });
+                return;
+            }
+
             // localStorage.setItem("token", response.accessToken);
             login(response.accessToken)
             localStorage.setItem("refreshToken", response.refreshToken);

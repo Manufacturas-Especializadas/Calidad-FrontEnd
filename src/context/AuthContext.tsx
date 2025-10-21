@@ -24,31 +24,51 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const token = localStorage.getItem("token");
         if (token) {
             try {
-                const payload = JSON.parse(atob(token.split(".")[1]));
+                const payloadBase64 = token.split('.')[1];
+                if (!payloadBase64) throw new Error("Token JWT malformado");
+
+                const payload = JSON.parse(atob(payloadBase64));
                 setUser({
                     id: payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'],
                     name: payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'],
                     role: payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'],
                 });
-            } catch (error: any) {
-                console.error("Token invalido", error);
+            } catch (error) {
+                console.error("Token inválido", error);
                 localStorage.removeItem("token");
+                setUser(null);
             }
         }
         setLoading(false);
     }, []);
 
     const login = (token: string) => {
-        localStorage.setItem("token", token);
-        const payload = JSON.parse(atob(token.split(".")[1]));
+        if (!token || typeof token !== 'string') {
+            console.error("Token inválido o ausente en login()");
+            logout();
+            return;
+        }
 
-        const newUser = {
-            id: payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'],
-            name: payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'],
-            role: payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'],
-        };
+        try {
+            const payloadBase64 = token.split('.')[1];
+            if (!payloadBase64) {
+                throw new Error("Token JWT malformado");
+            }
 
-        setUser(newUser);
+            const payload = JSON.parse(atob(payloadBase64));
+
+            const newUser: User = {
+                id: payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'],
+                name: payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'],
+                role: payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'],
+            };
+
+            setUser(newUser);
+            localStorage.setItem("token", token);
+        } catch (error) {
+            console.error("Error al procesar el token:", error);
+            logout();
+        }
     };
 
     const logout = () => {
