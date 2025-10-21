@@ -12,6 +12,10 @@ export const API_CONFIG = {
             register: "/api/Auth/Register",
             roles: "/api/Auth/GetRoles"
         },
+        users: {
+            getUsers: "/api/Users/GetUsers",
+            delete: "/api/Users/DeleteUser/"
+        },
         rejects: {
             defects: "/api/Rejections/GetDefects",
             conditions: "/api/Rejections/GetConditionByDefect",
