@@ -11,6 +11,8 @@ import { IndexScrap } from "../pages/Scrap/Index";
 import { AdminLinesIndex } from "../pages/AdminLines/AdminLinesIndex";
 import { AdminClients } from "../pages/AdminClients/AdminClients";
 import { AdminDefects } from "../pages/AdminDefects/AdminDefects";
+import { AdminUser } from "../pages/AdminUser/AdminUser";
+import { AdminDefectCondition } from "../pages/AdminDefectCondition/AdminDefectCondition";
 
 export const MyRoutes = () => {
     return (
@@ -35,6 +37,8 @@ export const MyRoutes = () => {
                     <Route path="/administrador-lineas" element={<AdminLinesIndex />} />
                     <Route path="/administrador-clientes" element={<AdminClients />} />
                     <Route path="/administrador-defectos" element={<AdminDefects />} />
+                    <Route path="/administrador-usuarios" element={<AdminUser />} />
+                    <Route path="/administrador-defectos-condicion" element={<AdminDefectCondition />} />
 
                     {/* Rejections */}
                     <Route path="/" element={<RejectionIndex />} />

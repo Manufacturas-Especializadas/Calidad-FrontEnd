@@ -7,6 +7,7 @@ import { FaFileExcel } from "react-icons/fa";
 import { useNavigate } from "react-router";
 import { OffCanvas } from "../../components/OffCanvas/OffCanvas";
 import { FormRejection } from "../../components/FormRejection/FormRejection";
+import { Button } from "../../components/Button/Button";
 
 
 export const AdminIndex = () => {
@@ -219,33 +220,21 @@ export const AdminIndex = () => {
                     </header>
 
                     <div className="mb-4 flex justify-between">
-                        <button
-                            onClick={() => navigate("/administrador-lineas")}
-                            className="flex items-center gap-2 px-4 py-2 rounded-md text-white font-medium transition-all
-                            bg-blue-600 hover:bg-blue-700 hover:cursor-pointer"
-                        >
+                        <Button variant="secondary" size="sm" onClick={() => navigate("/administrador-lineas")}>
                             Administar Lineas
-                        </button>
-                        <button
-                            onClick={() => navigate("/administrador-clientes")}
-                            className="flex items-center gap-2 px-4 py-2 rounded-md text-white font-medium transition-all
-                            bg-blue-600 hover:bg-blue-700 hover:cursor-pointer"
-                        >
+                        </Button>
+                        <Button variant="secondary" size="sm" onClick={() => navigate("/administrador-clientes")}>
                             Administra Clientes
-                        </button>
-                        <button
-                            onClick={() => navigate("/administrador-defectos")}
-                            className="flex items-center gap-2 px-4 py-2 rounded-md text-white font-medium transition-all
-                            bg-blue-600 hover:bg-blue-700 hover:cursor-pointer"
-                        >
+                        </Button>
+                        <Button variant="secondary" size="sm" onClick={() => navigate("/administrador-defectos")}>
                             Administra Defectos
-                        </button>
-                        {/* <button
-                            className="flex items-center gap-2 px-4 py-2 rounded-md text-white font-medium transition-all
-                            bg-blue-600 hover:bg-blue-700 hover:cursor-pointer"
-                        >
+                        </Button>
+                        <Button variant="secondary" size="sm" onClick={() => navigate("/administrador-defectos-condicion")}>
                             Administra Condición de Defectos
-                        </button> */}
+                        </Button>
+                        <Button variant="secondary" size="sm" onClick={() => navigate("/administrador-usuarios")}>
+                            Usuarios
+                        </Button>
                         <button
                             onClick={handleDownloadExcel}
                             disabled={loading || rejection.length === 0}
