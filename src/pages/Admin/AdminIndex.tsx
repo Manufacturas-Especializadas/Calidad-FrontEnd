@@ -229,7 +229,7 @@ export const AdminIndex = () => {
                         <Button variant="secondary" size="sm" onClick={() => navigate("/administrador-defectos")}>
                             Administra Defectos
                         </Button>
-                        <Button variant="secondary" size="sm">
+                        <Button variant="secondary" size="sm" onClick={() => navigate("/administrador-defectos-condicion")}>
                             Administra Condición de Defectos
                         </Button>
                         <Button variant="secondary" size="sm" onClick={() => navigate("/administrador-usuarios")}>

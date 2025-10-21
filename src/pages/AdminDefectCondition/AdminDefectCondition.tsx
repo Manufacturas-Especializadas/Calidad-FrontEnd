@@ -1,10 +1,116 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "../../components/Button/Button";
 import { Table } from "../../components/Table/Table";
+import type { DefectCondition } from "../../interfaces/DefectCondition";
+import { defectConditionService } from "../../api/services/DefectCondiontionService";
+import { useNavigate } from "react-router";
+import Swal from "sweetalert2";
+import { OffCanvas } from "../../components/OffCanvas/OffCanvas";
+import { FormDefectCondition } from "../../components/FormDefectCondition/FormDefectCondition";
 
 export const AdminDefectCondition = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [tablekey, setTableKey] = useState(0);
+    const [isOffCanvaOpen, setIsOffCanvaOpen] = useState(false);
+    const [actionLoading, setActionLoading] = useState<number | null>(null);
+    const [editingConditionId, setEditingConditionId] = useState<number | null>(null);
+    const [defectCondition, setDefectCondition] = useState<DefectCondition[]>([]);
+    const navigate = useNavigate();
+
+    const handleOpenOffCanvas = () => setIsOffCanvaOpen(true);
+    const handleCloseOffCanvas = () => {
+        setIsOffCanvaOpen(false);
+        setEditingConditionId(null);
+    };
+
+    const getDefectCondition = async () => {
+        try {
+            const data = await defectConditionService.getDefectCondition();
+            setDefectCondition(data);
+            setError(null);
+        } catch (error: any) {
+            console.error("Error loading defect condition: ", error);
+            setDefectCondition([]);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        getDefectCondition();
+    }, [tablekey]);
+
+    const handleDelete = async (row: DefectCondition) => {
+        const result = await Swal.fire({
+            title: "¿Estas seguro?",
+            text: "Vas a eliminar esta condición",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#3085d6",
+            cancelButtonText: "Cancelar"
+        });
+
+        if (!result.isConfirmed) {
+            return;
+        }
+
+        setActionLoading(row.id);
+
+        try {
+            const response = await defectConditionService.deleteDefectCondition(row.id);
+
+            if (response.success) {
+                setDefectCondition(defectCondition.filter(defect => defect.id !== row.id));
+
+                Swal.fire({
+                    title: "¡Eliminado!",
+                    text: "La condicion ha sido eliminada correctamente",
+                    icon: "success",
+                    confirmButtonText: "Aceptar"
+                });
+            } else {
+                Swal.fire({
+                    title: "Error",
+                    text: response.message || "No se pudo eliminar",
+                    icon: "error",
+                    confirmButtonText: "Aceptar"
+                });
+            }
+        } catch (error: any) {
+            console.error("Error al eliminar: ", error);
+            Swal.fire({
+                title: "Error",
+                text: "Hubo un problem al comunicarse con el servidor",
+                icon: "error",
+                confirmButtonText: "Aceptar"
+            });
+        } finally {
+            setActionLoading(null);
+        }
+    };
+
+    const handleSuccess = () => {
+        handleCloseOffCanvas();
+        setTableKey(prev => prev + 1);
+    };
+
+    const handleEdit = (condition: DefectCondition) => {
+        setEditingConditionId(condition.id);
+        setIsOffCanvaOpen(true);
+    };
+
+    const columns = [
+        {
+            name: "Defecto",
+            selector: (row: DefectCondition) => row.defecto
+        },
+        {
+            name: "Condición",
+            selector: (row: DefectCondition) => row.name
+        }
+    ];
 
     return (
         <>
@@ -20,10 +126,10 @@ export const AdminDefectCondition = () => {
                     </header>
 
                     <div className="mb-4 flex justify-evenly">
-                        <Button variant="secondary" size="sm">
+                        <Button variant="secondary" size="sm" onClick={() => navigate("/administrador")}>
                             REGRESAR
                         </Button>
-                        <Button variant="secondary" size="sm">
+                        <Button variant="secondary" size="sm" onClick={handleOpenOffCanvas}>
                             REGISTRAR NUEVA CONDICIÓN
                         </Button>
                     </div>
@@ -43,12 +149,26 @@ export const AdminDefectCondition = () => {
                                     </button>
                                 </div>
                             ) : (
-                                <></>
+                                <Table<DefectCondition>
+                                    columns={columns}
+                                    data={defectCondition}
+                                    onEdit={handleEdit}
+                                    onDelete={handleDelete}
+                                    actionLoading={actionLoading}
+                                />
                             )}
                         </div>
                     </div>
                 </div>
             </div>
+
+            <OffCanvas
+                title="CONDICIÓN"
+                isOpen={isOffCanvaOpen}
+                onClose={handleCloseOffCanvas}
+            >
+                <FormDefectCondition onSuccess={handleSuccess} defectId={editingConditionId ?? undefined} />
+            </OffCanvas>
         </>
     )
 }

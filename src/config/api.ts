@@ -64,7 +64,12 @@ export const API_CONFIG = {
         },
         conditions: {
             conditions: "/api/DefectCondition/GetCondition",
-            update: "/api/DefectCondition/UpdateDefectCondition/"
+            getDefects: "/api/DefectCondition/GetDefects",
+            getConditionByDefect: "/api/DefectCondition/GetConditionByDefect",
+            getConditionById: "/api/DefectCondition/GetConditionById/",
+            create: "/api/DefectCondition/RegisterDefectCondition",
+            update: "/api/DefectCondition/UpdateDefectCondition/",
+            delete: "/api/DefectCondition/DeleteDefectCondition/"
         }
     }
 }
