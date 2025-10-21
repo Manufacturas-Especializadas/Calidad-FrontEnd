@@ -44,26 +44,21 @@ class ApiClient {
     }
 
     async post<T>(endpoint: string, data: any): Promise<T> {
-        const fullUrl = `${this.baseUrl}${endpoint}`;
-        const authHeaders = this.getAuthHeaders();
-
         if (data instanceof FormData) {
-            const response = await fetch(fullUrl, {
+            return this.request<T>(endpoint, {
                 method: "POST",
-                headers: { ...authHeaders },
+                headers: this.getAuthHeaders(),
                 body: data,
             });
-            return response.json();
         } else {
-            const response = await fetch(fullUrl, {
+            return this.request<T>(endpoint, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    ...authHeaders,
+                    ...this.getAuthHeaders(),
                 },
                 body: JSON.stringify(data),
             });
-            return response.json();
         }
     }
 
