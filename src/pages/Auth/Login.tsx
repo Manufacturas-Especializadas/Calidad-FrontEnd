@@ -67,7 +67,6 @@ export const Login = () => {
                 return;
             }
 
-            // localStorage.setItem("token", response.accessToken);
             login(response.accessToken)
             localStorage.setItem("refreshToken", response.refreshToken);
 
