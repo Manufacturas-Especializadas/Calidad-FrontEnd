@@ -440,8 +440,6 @@ export const FormRejection = ({ onSuccess, rejectionId }: Props) => {
     };
 
     const removeExistingFile = (index: number) => {
-        // Aquí deberás decidir cómo manejar la eliminación en el backend.
-        // Por ahora, solo la quitamos de la vista.
         setExistingImageUrls(prev => prev.filter((_, i) => i !== index));
     };
 
