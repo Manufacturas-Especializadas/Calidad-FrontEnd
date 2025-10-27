@@ -209,6 +209,39 @@ export const RejectionIndex = () => {
         window.location.href = mailtoUrl;
     };
 
+    const handleViewDetails = (item: Rejections) => {
+        const formattedDate = (date: string) => {
+            if (!date) return "-";
+            const parsedDate = new Date(date);
+            if (isNaN(parsedDate.getTime())) return "Fecha inválida";
+            const day = String(parsedDate.getDate()).padStart(2, "0");
+            const month = String(parsedDate.getMonth() + 1).padStart(2, "0");
+            const year = parsedDate.getFullYear();
+            return `${day}/${month}/${year}`;
+        };
+
+        Swal.fire({
+            title: `DETALLES DE RECHAZO`,
+            html: `
+            <div style="text-align: left; line-height: 1.6; font-size: 14px;">
+                <p><strong>Fecha:</strong> ${formattedDate(item.registrationDate)}</p>
+                <p><strong>Inspector:</strong> ${item.insepector || '—'}</p>
+                <p><strong>Número de parte:</strong> ${item.partNumber || '—'}</p>
+                <p><strong>Cantidad:</strong> ${item.numberOfPieces || '—'}</p>
+                <p><strong>Defecto:</strong> ${item.defects || '—'}</p>
+                <p><strong>Condición:</strong> ${item.condition || '—'}</p>
+                <p><strong>Cliente:</strong> ${item.clients || '—'}</p>
+                <p><strong>Línea:</strong> ${item.lines || '—'}</p>
+                <p><strong>Nómina operador:</strong> ${item.operatorPayroll || '—'}</p>
+                <p><strong>Descripción:</strong> ${item.description || '—'}</p>
+                <p><strong>Folio:</strong> ${item.folio || '—'}</p>
+            </div>
+        `,
+            confirmButtonText: "Cerrar",
+            icon: "info"
+        });
+    };
+
     const handleDownloadExcel = async () => {
         if (downloadLoading) return;
 
@@ -322,55 +355,72 @@ export const RejectionIndex = () => {
                             ) : (
                                 <>
                                     <div className="space-y-5">
-                                        {currentItems.map((item) => (
-                                            <article
-                                                key={item.id}
-                                                className="group relative rounded-xl border border-gray-200 bg-white p-5 
-                                                    shadow-sm transition-all duration-300 hover:shadow-md hover:border-gray-300"
-                                            >
-                                                <time className="block text-xs font-medium text-gray-500 mb-3">
-                                                    {formatDate(item.registrationDate)}
-                                                </time>
+                                        {currentItems.map((item) => {
+                                            const isAdmin = user?.role?.includes("Admin") || user?.role === "Admin";
 
-                                                <div className="flex flex-col sm:flex-row gap-4">
-                                                    <div className="flex-shrink-0 w-16 h-16 rounded-lg 
-                                                        overflow-hidden bg-gray-100 flex items-center justify-center">
-                                                        {renderFirstImage(item.image) || (
-                                                            <span className="text-gray-400 text-sm">Sin imagen</span>
-                                                        )}
-                                                    </div>
+                                            return (
+                                                <article
+                                                    key={item.id}
+                                                    className={`group relative rounded-xl border border-gray-200 bg-white p-5 
+                                                    shadow-sm transition-all duration-300 hover:shadow-md hover:border-gray-300
+                                                    ${isAdmin ? "cursor-pointer hover:bg-gray-50" : ""}`}
+                                                    onClick={(e) => {
+                                                        if (isAdmin) {
+                                                            e.stopPropagation();
+                                                            handleViewDetails(item);
+                                                        }
+                                                    }}
+                                                >
+                                                    <time className="block text-xs font-medium text-gray-500 mb-3">
+                                                        {formatDate(item.registrationDate)}
+                                                    </time>
 
-                                                    <div className="flex-1 min-w-0">
-                                                        <h3 className="text-sm sm:text-base font-semibold text-gray-900 leading-relaxed line-clamp-2">
-                                                            {item.description}
-                                                        </h3>
-                                                    </div>
+                                                    <div className="flex flex-col sm:flex-row gap-4">
+                                                        <div className="flex-shrink-0 w-16 h-16 rounded-lg 
+                                                            overflow-hidden bg-gray-100 flex items-center justify-center">
+                                                            {renderFirstImage(item.image) || (
+                                                                <span className="text-gray-400 text-sm">Sin imagen</span>
+                                                            )}
+                                                        </div>
 
-                                                    <div className="flex gap-2 mt-2 sm:mt-0 sm:ml-auto">
-                                                        <RoleGuard allowedRoles={["Admin", "Ingeniero"]}>
-                                                            <button
-                                                                aria-label="Enviar por WhatsApp"
-                                                                className="flex items-center justify-center w-10 h-10 rounded-lg 
-                                                                bg-green-50 text-green-600 hover:bg-green-100 transition-colors 
-                                                                focus:outline-none focus:ring-2 focus:ring-green-300 hover:cursor-pointer"
-                                                                onClick={() => sendToWhatsApp(item)}
-                                                            >
-                                                                <FaWhatsapp className="text-lg" />
-                                                            </button>
-                                                            <button
-                                                                aria-label="Enviar por Outlook"
-                                                                className="flex items-center justify-center w-10 h-10 rounded-lg 
-                                                                bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors 
-                                                                focus:outline-none focus:ring-2 focus:ring-blue-300 hover:cursor-pointer"
-                                                                onClick={() => sendToOutlook(item)}
-                                                            >
-                                                                <PiMicrosoftOutlookLogoFill className="text-lg" />
-                                                            </button>
-                                                        </RoleGuard>
+                                                        <div className="flex-1 min-w-0">
+                                                            <h3 className="text-sm sm:text-base font-semibold text-gray-900 leading-relaxed line-clamp-2">
+                                                                {item.description}
+                                                            </h3>
+                                                        </div>
+
+                                                        <div className="flex gap-2 mt-2 sm:mt-0 sm:ml-auto">
+                                                            <RoleGuard allowedRoles={["Admin", "Ingeniero"]}>
+                                                                <button
+                                                                    aria-label="Enviar por WhatsApp"
+                                                                    className="flex items-center justify-center w-10 h-10 rounded-lg 
+                                                                    bg-green-50 text-green-600 hover:bg-green-100 transition-colors 
+                                                                    focus:outline-none focus:ring-2 focus:ring-green-300"
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        sendToWhatsApp(item);
+                                                                    }}
+                                                                >
+                                                                    <FaWhatsapp className="text-lg" />
+                                                                </button>
+                                                                <button
+                                                                    aria-label="Enviar por Outlook"
+                                                                    className="flex items-center justify-center w-10 h-10 rounded-lg 
+                                                                    bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors 
+                                                                    focus:outline-none focus:ring-2 focus:ring-blue-300"
+                                                                    onClick={(e) => {
+                                                                        e.stopPropagation();
+                                                                        sendToOutlook(item);
+                                                                    }}
+                                                                >
+                                                                    <PiMicrosoftOutlookLogoFill className="text-lg" />
+                                                                </button>
+                                                            </RoleGuard>
+                                                        </div>
                                                     </div>
-                                                </div>
-                                            </article>
-                                        ))}
+                                                </article>
+                                            );
+                                        })}
                                     </div>
 
                                     {totalPage > 1 && (
