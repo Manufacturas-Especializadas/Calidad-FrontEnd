@@ -420,6 +420,19 @@ export const FormRejection = ({ onSuccess, rejectionId }: Props) => {
         }
     };
 
+    const formatDateForDisplay = (dateString: string) => {
+        if (!dateString) return "";
+
+        const [year, month, day] = dateString.split('-').map(Number);
+        const date = new Date(year, month - 1, day);
+
+        return date.toLocaleDateString('es-MX', {
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit'
+        });
+    };
+
     const removeFile = (index: number) => {
         setSelectedFiles(prev => prev.filter((_, i) => i !== index));
     };
@@ -480,9 +493,7 @@ export const FormRejection = ({ onSuccess, rejectionId }: Props) => {
                         type="text"
                         name="registrationDate"
                         label="Fecha"
-                        value={new Date(formData.registrationDate).toLocaleDateString('es-MX', {
-                            year: 'numeric', month: '2-digit', day: '2-digit'
-                        })}
+                        value={formatDateForDisplay(formData.registrationDate)}
                         readOnly
                         className="bg-gray-50 cursor-not-allowed"
                     />
