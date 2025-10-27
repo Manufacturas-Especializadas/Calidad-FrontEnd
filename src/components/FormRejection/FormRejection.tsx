@@ -9,6 +9,7 @@ import type { Clients } from "../../interfaces/Clients";
 import type { Actions } from "../../interfaces/Actions";
 import Swal from "sweetalert2";
 import { Button } from "../Button/Button";
+import { useAuth } from "../../context/AuthContext";
 
 interface Props {
     onSuccess?: () => void;
@@ -16,8 +17,9 @@ interface Props {
 }
 
 export const FormRejection = ({ onSuccess, rejectionId }: Props) => {
+    const { user } = useAuth();
     const [formData, setFormData] = useState<RejectionFormData>({
-        insepector: "",
+        insepector: user?.payrollNumber || "",
         partNumber: "",
         numberOfPieces: 0,
         description: "",
@@ -521,7 +523,8 @@ export const FormRejection = ({ onSuccess, rejectionId }: Props) => {
                         label="Inspector"
                         name="insepector"
                         defaultValue={formData.insepector}
-                        onChange={handleInputChange}
+                        readOnly
+                        className="bg-gray-50 cursor-not-allowed"
                     />
 
                     <FormInput

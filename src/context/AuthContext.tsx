@@ -5,6 +5,7 @@ interface User {
     id: string;
     name: string;
     role: string;
+    payrollNumber: string;
 }
 
 interface AuthContextType {
@@ -32,6 +33,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                     id: payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'],
                     name: payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'],
                     role: payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'],
+                    payrollNumber: payload['PayRollNumber'] || '',
                 });
             } catch (error) {
                 console.error("Token inválido", error);
@@ -61,6 +63,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                 id: payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'],
                 name: payload['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name'],
                 role: payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'],
+                payrollNumber: payload['PayRollNumber'] || '',
             };
 
             setUser(newUser);
